@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2023-12-14T18:28:52" description="CARLA:test_scenario_08" author="ScenarioBuilderTM" />
+  <FileHeader revMajor="1" revMinor="0" date="2023-12-14T18:33:07" description="CARLA:test_scenario_08" author="ScenarioBuilderTM" />
   <ParameterDeclarations />
   <CatalogLocations />
   <RoadNetwork>
@@ -75,7 +75,7 @@
               <SpeedAction>
                 <SpeedActionDynamics dynamicsShape="step" value="0" dynamicsDimension="time" />
                 <SpeedActionTarget>
-                  <AbsoluteTargetSpeed value="27.7777777777778" />
+                  <AbsoluteTargetSpeed value="2.77777777777778" />
                 </SpeedActionTarget>
               </SpeedAction>
             </LongitudinalAction>
@@ -91,7 +91,7 @@
           </Actors>
           <Maneuver name="Ego Vehicle_Maneuver">
             <Event name="AcquirePositionAction-EgoVehicle-Destination" priority="overwrite">
-              <Action name="AcquirePositionAction5">
+              <Action name="AcquirePositionAction6">
                 <PrivateAction>
                   <RoutingAction>
                     <AcquirePositionAction>
@@ -104,7 +104,7 @@
               </Action>
               <StartTrigger>
                 <ConditionGroup>
-                  <Condition name="SimulationTimeCondition5" delay="0" conditionEdge="rising">
+                  <Condition name="SimulationTimeCondition6" delay="0" conditionEdge="rising">
                     <ByValueCondition>
                       <SimulationTimeCondition value="0" rule="greaterThan" />
                     </ByValueCondition>
