@@ -1,0 +1,70 @@
+{
+    "scenario": "test_scenario_06",
+    "success": false,
+    "criteria": [
+        {
+            "name": "RunningStopTest",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "RunningRedLightTest",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "WrongLaneTest",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "OnSidewalkTest",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "CheckKeepLane",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 12,
+            "success": false
+        },
+        {
+            "name": "CollisionTest",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 0,
+            "actual": 6,
+            "success": false
+        },
+        {
+            "name": "CheckDrivenDistance",
+            "actor": "audi.tt-270",
+            "optional": false,
+            "expected": 1.0,
+            "actual": 158.97,
+            "success": true
+        },
+        {
+            "name": "Duration",
+            "actor": "all",
+            "optional": false,
+            "expected": 100000,
+            "actual": 204.07584138959646,
+            "success": true
+        }
+    ]
+}

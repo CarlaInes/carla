@@ -1,0 +1,70 @@
+{
+    "scenario": "test_scenario_05",
+    "success": false,
+    "criteria": [
+        {
+            "name": "RunningStopTest",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "RunningRedLightTest",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "WrongLaneTest",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "OnSidewalkTest",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "CheckKeepLane",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 1,
+            "success": false
+        },
+        {
+            "name": "CollisionTest",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 0,
+            "actual": 0,
+            "success": true
+        },
+        {
+            "name": "CheckDrivenDistance",
+            "actor": "kawasaki.ninja-524",
+            "optional": false,
+            "expected": 1.0,
+            "actual": 34.96,
+            "success": true
+        },
+        {
+            "name": "Duration",
+            "actor": "all",
+            "optional": false,
+            "expected": 100000,
+            "actual": 76.77481051743962,
+            "success": true
+        }
+    ]
+}

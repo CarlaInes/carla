@@ -374,6 +374,7 @@ class ScenarioRunner(object):
         """
         Load and run the scenario given by config
         """
+        print("scenario_runner._load_and_run_scenario() function")
         result = False
         if not self._load_and_wait_for_world(config.town, config.ego_vehicles):
             self._cleanup()
@@ -451,6 +452,7 @@ class ScenarioRunner(object):
             result = False
 
         self._cleanup()
+        print("end of scenario_runner._load_and_run_scenario() function")
         return result
 
     def _run_scenarios(self):
@@ -503,6 +505,7 @@ class ScenarioRunner(object):
         """
         Run a scenario based on OpenSCENARIO
         """
+        print("scenario_runner._run_openscenario() function")
 
         # Load the scenario configurations provided in the config file
         if not os.path.isfile(self._args.openscenario):
@@ -519,12 +522,14 @@ class ScenarioRunner(object):
 
         result = self._load_and_run_scenario(config)
         self._cleanup()
+        print("end of scenario_runner._run_openscenario() function")
         return result
 
     def run(self):
         """
         Run all scenarios according to provided commandline args
         """
+        print("scenario_runner.run() function")
         result = True
         if self._args.openscenario:
             result = self._run_openscenario()
@@ -534,6 +539,7 @@ class ScenarioRunner(object):
             result = self._run_scenarios()
 
         print("No more scenarios .... Exiting")
+        print("end of scenario_runner.run() function")
         return result
 
 

@@ -193,6 +193,7 @@ class RunnerTool(object):
 
             xosc_maps_sorted = dict(sorted(xosc_maps.items(), key=lambda item: item[1]))
             file_list = list(xosc_maps_sorted.keys())
+        print(file_list)
 
         return file_list 
 
@@ -281,6 +282,7 @@ class RunnerTool(object):
     def runner(self):
         ''' Runs all n .xosc files in specified dir by executing scenario_runner.py in n subprocesses.'''
         conf = self.config
+        print("runnerTool.runner() function")
 
         folder_addr = conf["PATH_TO_XOSC_FILES"]
         file_list = self.get_xosc(self.sort_maps)
@@ -295,7 +297,6 @@ class RunnerTool(object):
                         self.set_agent(openscenario)          
                     # Building subprocess command. (Subprocess is executed in new cmd terminal, thus python env root is required.)
                     cmd = """cd \"{runner_root}\"\
-
                                 && {python_root}/python3 scenario_runner.py --openscenario \"{file}\" --reloadWorld --json --outputDir \"{result_path}\"{speed} {camera}
                             """.format(runner_root= conf["PATH_TO_SCENARIO_RUNNER_ROOT"],
                                        python_root=conf["PATH_TO_PYTHON_ENV"],
@@ -305,8 +306,9 @@ class RunnerTool(object):
                                        camera=self.set_camera_perspective())
                                        
                     try:
+                        print("starting subprocess")
 
-                        if self.debug:
+                        if self.debug or True:
                             result = subprocess.Popen(cmd, shell=True, start_new_session=True)
                             result.wait(timeout=self.timeout)
                         else:
@@ -315,6 +317,9 @@ class RunnerTool(object):
                     except subprocess.TimeoutExpired:
                         self.log.create_entry(f'Timeout for {file} ({self.timeout-10}s) expired')
                         result.kill()
+                    print("ending subprocess")
+
+
                     
                     #removed in v1.02:                
                     #result = subprocess.run(cmd, shell=True, capture_output=True)
@@ -325,6 +330,7 @@ class RunnerTool(object):
                     self.log.create_entry(e)
 
         self.create_results_overview()
+        print("runnerTool.runner() function finished")
 
     def print_subprocess_output(self, result: subprocess):
         '''
