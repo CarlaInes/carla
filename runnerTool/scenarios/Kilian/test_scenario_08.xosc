@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2023-12-14T18:33:07" description="CARLA:test_scenario_08" author="ScenarioBuilderTM" />
+  <FileHeader revMajor="1" revMinor="0" date="2023-12-14T18:39:41" description="CARLA:test_scenario_08" author="ScenarioBuilderTM" />
   <ParameterDeclarations />
   <CatalogLocations />
   <RoadNetwork>
@@ -66,7 +66,7 @@
           <PrivateAction>
             <TeleportAction>
               <Position>
-                <WorldPosition x="-48.69" y="37.38" z="0.3" h="-6.28" />
+                <WorldPosition x="-133.68" y="37.27" z="0.3" h="-6.28" />
               </Position>
             </TeleportAction>
           </PrivateAction>
@@ -91,12 +91,12 @@
           </Actors>
           <Maneuver name="Ego Vehicle_Maneuver">
             <Event name="AcquirePositionAction-EgoVehicle-Destination" priority="overwrite">
-              <Action name="AcquirePositionAction6">
+              <Action name="AcquirePositionAction7">
                 <PrivateAction>
                   <RoutingAction>
                     <AcquirePositionAction>
                       <Position>
-                        <WorldPosition x="34.309" y="37.722" z="0.3" h="-6.28" />
+                        <WorldPosition x="60.309" y="37.828" z="0.3" h="-6.28" />
                       </Position>
                     </AcquirePositionAction>
                   </RoutingAction>
@@ -104,7 +104,7 @@
               </Action>
               <StartTrigger>
                 <ConditionGroup>
-                  <Condition name="SimulationTimeCondition6" delay="0" conditionEdge="rising">
+                  <Condition name="SimulationTimeCondition7" delay="0" conditionEdge="rising">
                     <ByValueCondition>
                       <SimulationTimeCondition value="0" rule="greaterThan" />
                     </ByValueCondition>
