@@ -7,9 +7,17 @@ import numpy as np
 import random
 from copy import deepcopy
 
+
+
 #########################################
 # general help functions:
 #########################################
+
+all_road_lane_ids = None
+"""global cache for all road_lane_ids"""
+
+_active_world_name = None
+"""key to store the active world name"""
 
 def initialize_dataframe():
     """
@@ -122,6 +130,11 @@ def check_ego_on_highway(ego_vehicle_location, road_lane_ids, world_map):
 
     return False
 
+# Modern cache method, but requires cachetools package as requirement. 
+# Note: world_map may not be a keyword argument for attrgetter
+#from cachetools import cached, LRUCache
+#from operator import attrgetter
+#@cached(cache=LRUCache(maxsize=1), key=attrgetter("name"))
 def get_all_road_lane_ids(world_map):
     """
     Retrieve a set of unique road and lane identifiers in the format "roadId_laneId" from the given world map.
@@ -132,6 +145,10 @@ def get_all_road_lane_ids(world_map):
     Returns:
         set: A set containing unique road and lane identifiers in the format "roadId_laneId".
     """
+    global all_road_lane_ids
+    global _active_world_name
+    if all_road_lane_ids is not None and world_map.name == _active_world_name:
+        return all_road_lane_ids # retrieve cache
     road_lane_ids = set()
 
     # iterate through all waypoints in the world map
@@ -141,8 +158,12 @@ def get_all_road_lane_ids(world_map):
         road_id = waypoint.road_id
         # add road and lane identifiers to set
         road_lane_ids.add(f"{road_id}_{lane_id}")
+    
+    # Cache value
+    all_road_lane_ids = frozenset(road_lane_ids)
+    _active_world_name = world_map.name
 
-    return road_lane_ids
+    return all_road_lane_ids
 
 def distance(p1, p2):
     """Define a function to calculate the distance between two points (carla Location objects).
@@ -605,6 +626,7 @@ def detect_surrounding_cars(
             matrix,
             world_map,
             ghost,
+            road_lane_ids=road_lane_ids,
         )
         
         if col is None:
@@ -737,7 +759,7 @@ def get_forward_vector_distance(ego_vehicle_location, other_car, world_map):
     return math.sqrt(abs(distance_ego_other**2 - distance_opposite**2))
 
 def calculate_position_in_matrix(
-    ego_location, ego_vehicle, other_car, matrix, world_map, ghost=False
+    ego_location, ego_vehicle, other_car, matrix, world_map, ghost=False, *, road_lane_ids
 ):
     """
     Calculate the position of the other car in the city matrix based on its relative location and distance from the ego vehicle.
@@ -761,6 +783,7 @@ def calculate_position_in_matrix(
                 "right_outer_lane": [3, 3, 3, 3, 3, 3, 3, 3],
         world_map (carla.WorldMap): The map representing the environment.
         ghost (bool): Ghost mode when ego is exiting/entrying a highway - fix a location of an imaginary vehicle on highway to correctly build matrix from this ghost perspective.
+        load_lane_ids (list): A list of all road-lane identifiers of the map, where each identifier is a string in the format "roadId_laneId". 
 
     Returns:
         int or None: The column index in the city matrix representing the column in the city matrix of the other car,
@@ -788,8 +811,6 @@ def calculate_position_in_matrix(
     # Get road_lane_id of other vehicle
     other_car_waypoint = world_map.get_waypoint(other_location)
     other_car_road_lane_id = str(other_car_waypoint.road_id) + "_" + str(other_car_waypoint.lane_id)
-
-    road_lane_ids = get_all_road_lane_ids(world_map)
     
     # if ego is on highway use different speed factor --> we look further ahead/behind on highway
     if check_ego_on_highway(ego_location, road_lane_ids, world_map):
@@ -2857,7 +2878,8 @@ def get_row_col_on_entry_or_exit(
     entry_highway_road, 
     exit_highway_road, 
     right_lane_start_wp, 
-    right_lane_end_wp
+    right_lane_end_wp,
+    road_lane_ids
 ):
     """This function determines the row and column index in the matrix for a given car being on an entry/exit. This
     depends on the type entry/exit and whether the car entrying or exiting. 
@@ -2885,6 +2907,7 @@ def get_row_col_on_entry_or_exit(
         exit_highway_road (list): List with all road ids of highway roads going into the exit road of the junction object.
         right_lane_start_wp (carla.Waypoint): Start waypoint of the right lane (entry/exit) needed for dual entry & exit surrounding cars angle calculation
         right_lane_end_wp (carla.Waypoint): End waypoint of the right lane (entry/exit) needed for dual entry & exit surrounding cars angle calculation
+        road_lane_ids (list of str): List of road and lane IDs in the world map.
     Returns:
         int: integer indicating the row in the matrix for the given car.
         int: If on entry, integer indicating the column in the matrix for the given car.
@@ -2935,7 +2958,6 @@ def get_row_col_on_entry_or_exit(
         if entry_city_road == exit_city_road:
             if is_junction_behind(other_car_waypoint, 40):
                 check_junction = get_junction_behind(other_car_waypoint, 40)
-                road_lane_ids = get_all_road_lane_ids(world_map)
                 if is_highway_junction(car, other_car_waypoint, check_junction, road_lane_ids, direction_angle, world_map):
                     on_exit_street = True
                 else:
@@ -3078,6 +3100,8 @@ def update_matrix(
     direction_angle,
     ghost=False,
     on_entry = False,
+    *,
+    road_lane_ids
 ):
     """The function updates the matrix with. First, it searches for an exit/entry and adds it
     to the matrix. Then, it iterates over all cars in its radius and adds them to the matrix in 
@@ -3099,6 +3123,7 @@ def update_matrix(
         direction_angle (float): The angle used to determine directions from the ego vehicle.
         ghost (bool): Ghost mode when ego is exiting/entrying a highway - fix a location of an imaginary vehicle on highway to correctly build matrix from this ghost perspective.
         on_entry (bool): Indicating if ego is on an entry or exit lane
+        road_lane_ids (list of str): List of road and lane IDs in the world map.
 
     Returns:
         matrix (collections.OrderedDict): An ordered dictionary representing the city matrix. The keys for existing lanes are the lane IDs in the format "road_id_lane_id". 
@@ -3223,6 +3248,7 @@ def update_matrix(
             dict(matrix),
             world_map,
             ghost,
+            road_lane_ids=road_lane_ids,
         )
         if col is None:
             continue
@@ -3271,7 +3297,8 @@ def update_matrix(
                 entry_highway_road, 
                 exit_highway_road, 
                 right_lane_start_wp, 
-                right_lane_end_wp)
+                right_lane_end_wp,
+                road_lane_ids=road_lane_ids)
             
             if row is None:
                 continue
@@ -3709,7 +3736,7 @@ def get_car_detection_matrix(ego_vehicle, ego_waypoint, ego_location, world, jun
     """
     # create dictionary to store all the parameters - to be updated & returned in the end
     if road_lane_ids == None:
-        road_lane_ids = get_all_road_lane_ids(world_map=world.get_map())
+        road_lane_ids = get_all_road_lane_ids(world.get_map())
     params = locals().copy()
     del params["ego_vehicle"] # not part of parameters in main 
     del params["ego_waypoint"] # not part of parameters in main 
@@ -3929,10 +3956,10 @@ def get_car_detection_matrix(ego_vehicle, ego_waypoint, ego_location, world, jun
             )
             # update matrix with highway entry/exit detection (including other cars)
             if not highway_shape is None and (highway_shape[0] != "normal_highway" or wrong_shape):
-                matrix = update_matrix(world_map, ego_vehicle, ego_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle) 
+                matrix = update_matrix(world_map, ego_vehicle, ego_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle, road_lane_ids=road_lane_ids) 
                 if not junction_old is None and junction_old.id != junction.id:
                     # update matrix with highway entry/exit detection for junction behind: dynamically move entry/exit out of matrix behind ego
-                    matrix = update_matrix(world_map, ego_vehicle, ego_location, highway_shape_old, wps_old, matrix, junction_old, cars_on_entryExit, direction_angle) 
+                    matrix = update_matrix(world_map, ego_vehicle, ego_location, highway_shape_old, wps_old, matrix, junction_old, cars_on_entryExit, direction_angle, road_lane_ids=road_lane_ids) 
         
     # 4. ego exiting Highway
     elif check_ego_exit_highway(ego_vehicle, ego_waypoint, highway_forward_vector, highway_shape, current_lanes) and not exit_over:
@@ -3976,7 +4003,7 @@ def get_car_detection_matrix(ego_vehicle, ego_waypoint, ego_location, world, jun
             )
 
             if not highway_shape is None:
-                matrix  = update_matrix(world_map, ego_vehicle, middle_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle, ghost=True, on_entry=False) 
+                matrix  = update_matrix(world_map, ego_vehicle, middle_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle, ghost=True, on_entry=False, road_lane_ids=road_lane_ids) 
                 # if not junction_old is None and junction_old.id != junction.id:
                 #     matrix = update_matrix(world_map, ego_vehicle, middle_location, highway_shape_old, wps_old, matrix, closest_waypoint, junction_old, cars_on_entryExit, True, on_entry) 
 
@@ -4013,7 +4040,7 @@ def get_car_detection_matrix(ego_vehicle, ego_waypoint, ego_location, world, jun
             )
 
             if not highway_shape is None:
-                matrix = update_matrix(world_map, ego_vehicle, middle_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle, ghost=True, on_entry=True) 
+                matrix = update_matrix(world_map, ego_vehicle, middle_location, highway_shape, wps, matrix, junction, cars_on_entryExit, direction_angle, ghost=True, on_entry=True, road_lane_ids=road_lane_ids) 
 
     # 6. Normal Road
     else:
